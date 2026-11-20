@@ -31,7 +31,7 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
     onSelectCategory(id);
     const element = document.getElementById(`category-${id}`);
     if (element) {
-      const yOffset = -90; // offset for sticky header & dock
+      const yOffset = -100; // accurate offset for sticky header & dock
       const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
       window.scrollTo({ top: y, behavior: 'smooth' });
     }
@@ -58,7 +58,7 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
               {isActive && (
                 <motion.div
                   layoutId="categoryActiveBar"
-                  className="absolute bottom-0 inset-x-2 h-0.5 bg-gradient-to-r from-[#D92D16] to-[#FF5A1F] rounded-full"
+                  className="absolute bottom-1 inset-x-2 h-[2px] bg-gradient-to-r from-[#D92D16] to-[#FF5A1F] rounded-full"
                   transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                 />
               )}

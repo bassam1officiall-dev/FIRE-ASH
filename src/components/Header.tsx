@@ -10,10 +10,11 @@ export const Header: React.FC = () => {
     <header className="relative bg-[#09090B] border-b border-[#27272A] overflow-hidden">
       {/* Subtle Rising Embers Animation in Header (GPU transform only) */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden select-none" aria-hidden="true">
-        <span className="absolute bottom-2 left-[15%] w-1.5 h-1.5 bg-[#FF5A1F] rounded-full blur-[1px] animate-ember" style={{ '--duration': '5.2s', '--drift-x': '-12px' } as React.CSSProperties} />
-        <span className="absolute bottom-1 left-[32%] w-2 h-2 bg-[#D92D16] rounded-full blur-[1px] animate-ember" style={{ '--duration': '4.1s', '--drift-x': '18px' } as React.CSSProperties} />
-        <span className="absolute bottom-3 left-[60%] w-1.5 h-1.5 bg-[#FFB020] rounded-full blur-[1px] animate-ember" style={{ '--duration': '6.0s', '--drift-x': '-24px' } as React.CSSProperties} />
-        <span className="absolute bottom-2 left-[82%] w-2 h-2 bg-[#FF5A1F] rounded-full blur-[1px] animate-ember" style={{ '--duration': '4.8s', '--drift-x': '14px' } as React.CSSProperties} />
+        <span className="absolute bottom-2 left-[15%] w-2 h-2 bg-[#FF5A1F] rounded-full blur-[1px] animate-ember" style={{ '--duration': '5.2s', '--drift-x': '-12px' } as React.CSSProperties} />
+        <span className="absolute bottom-1 left-[32%] w-2.5 h-2.5 bg-[#D92D16] rounded-full blur-[1px] animate-ember" style={{ '--duration': '4.1s', '--drift-x': '18px' } as React.CSSProperties} />
+        <span className="absolute bottom-2 left-[48%] w-2 h-2 bg-[#FF5A1F] rounded-full blur-[1px] animate-ember" style={{ '--duration': '4.6s', '--drift-x': '8px' } as React.CSSProperties} />
+        <span className="absolute bottom-3 left-[62%] w-1.5 h-1.5 bg-[#FFB020] rounded-full blur-[1px] animate-ember" style={{ '--duration': '6.0s', '--drift-x': '-24px' } as React.CSSProperties} />
+        <span className="absolute bottom-2 left-[82%] w-2.5 h-2.5 bg-[#FF5A1F] rounded-full blur-[1px] animate-ember" style={{ '--duration': '4.8s', '--drift-x': '14px' } as React.CSSProperties} />
       </div>
 
       {/* Top Utility Bar */}

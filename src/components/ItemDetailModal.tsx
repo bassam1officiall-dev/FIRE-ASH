@@ -103,7 +103,7 @@ export const ItemDetailModal: React.FC = () => {
           </button>
 
           {/* Scrollable Content */}
-          <div className="overflow-y-auto flex-1 no-scrollbar pb-24">
+          <div className="overflow-y-auto flex-1 no-scrollbar pb-24 scroll-smooth" style={{ scrollBehavior: 'smooth' }}>
             {/* Dish Image */}
             <div className="relative w-full h-56 sm:h-64 bg-[#09090B]">
               <img

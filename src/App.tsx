@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import { Sandwich, Scale, UtensilsCrossed, Salad, SearchX } from 'lucide-react';
 import type { CategoryId, CravingType, MenuItem } from './types/menu';
 import { MENU_ITEMS } from './data/menuData';
@@ -20,27 +21,50 @@ const CATEGORY_META: Record<
 > = {
   sandwiches: {
     title: 'ساندوتشات',
-    subtitle: 'على الفحم .. بطعم مختلف',
+    subtitle: 'سندوتشات سخنة في عيش طازة على الجمر',
     icon: Sandwich,
   },
   weights: {
     title: 'الوزنات',
-    subtitle: 'جودة .. نكهة .. على الفحم',
+    subtitle: 'كيلو، نص، وربع — على ميزانك',
     icon: Scale,
   },
   meals: {
     title: 'الوجبات',
-    subtitle: 'كل وجبة .. حكاية نار',
+    subtitle: 'تشكيلات تشبّعك من الآخر',
     icon: UtensilsCrossed,
   },
   sides: {
     title: 'الإضافات والسلطات',
-    subtitle: 'كمّل أكلتك بأطيب التتبيلات',
+    subtitle: 'طحينة، سلطة بلدي، وأرز مفلفل',
     icon: Salad,
   },
 };
 
+const containerVariants: Variants = {
+  hidden: {},
+  show: {
+    transition: {
+      staggerChildren: 0.06,
+    },
+  },
+};
+
+const cardVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: 'spring',
+      stiffness: 300,
+      damping: 24,
+    },
+  },
+};
+
 export const App: React.FC = () => {
+  const shouldReduceMotion = useReducedMotion();
   const [activeCategory, setActiveCategory] = useState<CategoryId>('sandwiches');
   const [selectedCraving, setSelectedCraving] = useState<CravingType>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -151,8 +175,14 @@ export const App: React.FC = () => {
 
               return (
                 <section key={catId} id={`category-${catId}`} className="scroll-mt-24">
-                  {/* Category Header */}
-                  <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 pb-4 mb-6 border-b border-[#27272A]">
+                  {/* Category Header with Entrance Animation */}
+                  <motion.div
+                    initial={shouldReduceMotion ? false : { opacity: 0, x: 20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, margin: '-80px' }}
+                    transition={{ duration: 0.4, ease: 'easeOut' }}
+                    className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 pb-4 mb-6 border-b border-[#27272A]"
+                  >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-[#141417] border border-[#27272A] flex items-center justify-center text-[#FF5A1F] flex-shrink-0">
                         <Icon className="w-5 h-5" />
@@ -175,14 +205,26 @@ export const App: React.FC = () => {
                     <div className="text-start sm:text-end text-[11px] text-[#71717A]">
                       <span>مشويات طازجة بالطلب على الفحم</span>
                     </div>
-                  </div>
+                  </motion.div>
 
-                  {/* Cards Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {/* Cards Grid with Staggered Entrance Animation */}
+                  <motion.div
+                    variants={containerVariants}
+                    initial={shouldReduceMotion ? 'show' : 'hidden'}
+                    whileInView="show"
+                    viewport={{ once: true, margin: '-50px' }}
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+                  >
                     {items.map((item) => (
-                      <MenuItemCard key={item.id} item={item} />
+                      <motion.div
+                        key={item.id}
+                        variants={shouldReduceMotion ? undefined : cardVariants}
+                        className="h-full"
+                      >
+                        <MenuItemCard item={item} />
+                      </motion.div>
                     ))}
-                  </div>
+                  </motion.div>
                 </section>
               );
             })}

@@ -43,7 +43,7 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item }) => {
   return (
     <div
       onClick={handleCardClick}
-      className="group relative bg-[#141417] hover:bg-[#18181D] border border-[#27272A] hover:border-[#D92D16]/50 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col justify-between cursor-pointer shadow-md shadow-black/40 hover:shadow-xl hover:shadow-[#D92D16]/10"
+      className="group relative bg-[#141417] hover:bg-[#18181D] border border-[#27272A] hover:border-[#D92D16]/50 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col justify-between cursor-pointer shadow-md shadow-black/40 hover:shadow-[inset_0_0_0_1px_rgba(217,45,22,0.3),0_10px_25px_-5px_rgba(217,45,22,0.15)]"
     >
       {/* Top: Image & Badges */}
       <div>
@@ -53,7 +53,7 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item }) => {
               src={item.image}
               alt={item.name}
               onError={() => setImgError(true)}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 will-change-transform"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 will-change-transform"
               loading="lazy"
             />
           ) : (
@@ -138,7 +138,7 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item }) => {
                     <motion.div
                       layoutId={`weightHighlight-${item.id}`}
                       className="absolute inset-0 bg-[#27272A] border border-[#D92D16]/50 rounded-lg"
-                      transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                      transition={{ type: 'spring', stiffness: 600, damping: 40 }}
                     />
                   )}
                   <span className="relative z-10 block truncate">{w.label}</span>
@@ -179,17 +179,33 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item }) => {
               }`}
               title="إضافة سريعة إلى السلة"
             >
-              {justAdded ? (
-                <>
-                  <Check className="w-4 h-4 animate-scale-in" />
-                  <span>تمت الإضافة</span>
-                </>
-              ) : (
-                <>
-                  <Plus className="w-4 h-4" />
-                  <span>إضافة</span>
-                </>
-              )}
+              <AnimatePresence mode="wait" initial={false}>
+                {justAdded ? (
+                  <motion.span
+                    key="added"
+                    initial={{ scale: 0.7, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.7, opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                    className="flex items-center gap-1.5"
+                  >
+                    <Check className="w-4 h-4" />
+                    <span>تمت الإضافة</span>
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    key="add"
+                    initial={{ scale: 0.7, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.7, opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                    className="flex items-center gap-1.5"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>إضافة</span>
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </button>
           </div>
         </div>

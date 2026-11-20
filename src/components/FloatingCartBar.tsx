@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, ArrowLeft } from 'lucide-react';
+import { ShoppingBag, ArrowRight } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 export const FloatingCartBar: React.FC = () => {
@@ -25,9 +25,15 @@ export const FloatingCartBar: React.FC = () => {
           <div className="flex items-center gap-3">
             <div className="relative w-11 h-11 rounded-xl bg-gradient-to-br from-[#D92D16] to-[#FF5A1F] flex items-center justify-center text-white shadow-md shadow-[#D92D16]/30 flex-shrink-0">
               <ShoppingBag className="w-5 h-5" />
-              <span className="absolute -top-1.5 -end-1.5 w-5 h-5 rounded-full bg-white text-[#D92D16] text-[11px] font-black flex items-center justify-center font-['Oswald'] shadow">
+              <motion.span
+                key={totalCount}
+                initial={{ scale: 1.4 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 20 }}
+                className="absolute -top-1.5 -end-1.5 w-5 h-5 rounded-full bg-white text-[#D92D16] text-[11px] font-black flex items-center justify-center font-['Oswald'] shadow"
+              >
                 {totalCount}
-              </span>
+              </motion.span>
             </div>
 
             <div className="text-start">
@@ -44,7 +50,7 @@ export const FloatingCartBar: React.FC = () => {
           {/* Right / End: Button Action */}
           <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-[#D92D16] to-[#FF5A1F] text-white text-xs font-bold shadow group-hover:scale-[1.02] transition-transform">
             <span>مراجعة الطلب</span>
-            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
           </div>
         </button>
       </motion.div>

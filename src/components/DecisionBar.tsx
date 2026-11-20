@@ -62,7 +62,7 @@ export const DecisionBar: React.FC<DecisionBarProps> = ({
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="ابحث عن صنف (طرب، كفتة، حواوشي...)"
-            className="w-full bg-[#09090B] border border-[#27272A] focus:border-[#FF5A1F] rounded-xl ps-9 pe-8 py-2 text-xs text-white placeholder-[#71717A] focus:outline-none transition-colors"
+            className="w-full bg-[#09090B] border border-[#27272A] focus:border-[#FF5A1F] focus:shadow-[0_0_0_2px_rgba(255,90,31,0.2)] rounded-xl ps-9 pe-8 py-2 text-xs text-white placeholder-[#71717A] focus:outline-none transition-all"
           />
           {searchQuery && (
             <button

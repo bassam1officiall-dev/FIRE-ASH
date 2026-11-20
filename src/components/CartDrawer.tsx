@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { X, Plus, Minus, Trash2, ShoppingBag, Bike, Store, MessageCircle, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 export const CartDrawer: React.FC = () => {
+  const shouldReduceMotion = useReducedMotion();
   const {
     isCartOpen,
     setIsCartOpen,
@@ -47,14 +48,14 @@ export const CartDrawer: React.FC = () => {
           className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
         />
 
-        {/* Drawer Panel */}
-        <div className="fixed inset-y-0 start-0 max-w-full flex">
+        {/* Drawer Panel — slides in from right in RTL */}
+        <div className="fixed inset-y-0 right-0 max-w-full flex">
           <motion.div
-            initial={{ x: '-100%' }}
+            initial={shouldReduceMotion ? false : { x: '100%' }}
             animate={{ x: 0 }}
-            exit={{ x: '-100%' }}
+            exit={shouldReduceMotion ? { opacity: 0 } : { x: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-            className="w-screen max-w-md bg-[#141417] border-e border-[#27272A] shadow-2xl flex flex-col h-full"
+            className="w-screen max-w-md bg-[#141417] border-s border-[#27272A] shadow-2xl flex flex-col h-full"
           >
             {/* Header */}
             <div className="p-4 sm:p-5 border-b border-[#27272A] flex items-center justify-between bg-[#09090B]">
@@ -96,9 +97,9 @@ export const CartDrawer: React.FC = () => {
                 <div className="w-16 h-16 rounded-full bg-[#1C1C21] border border-[#27272A] flex items-center justify-center text-[#71717A] mb-4">
                   <ShoppingBag className="w-8 h-8 opacity-40" />
                 </div>
-                <h3 className="text-base font-bold text-white mb-1">سلتك فارغة حتى الآن</h3>
+                <h3 className="text-base font-bold text-white mb-1">السلة فاضية</h3>
                 <p className="text-xs text-[#A1A1AA] max-w-xs mb-6">
-                  استمتع بأشهى المشويات على الفحم والساندوتشات والوجبات، وأضف ما يحلو لك بنقرة واحدة!
+                  السلة فاضية — ابدأ طلبك من المنيو.
                 </p>
                 <button
                   onClick={() => setIsCartOpen(false)}
@@ -111,87 +112,96 @@ export const CartDrawer: React.FC = () => {
               <div className="flex-1 overflow-y-auto no-scrollbar p-4 space-y-4">
                 {/* Cart Items List */}
                 <div className="space-y-3">
-                  {cart.map((item) => (
-                    <div
-                      key={item.cartItemId}
-                      className="bg-[#09090B] border border-[#27272A] rounded-xl p-3 flex gap-3 items-start"
-                    >
-                      {/* Thumbnail */}
-                      <img
-                        src={item.menuItem.image}
-                        alt={item.menuItem.name}
-                        className="w-16 h-16 rounded-lg object-cover bg-[#1C1C21] flex-shrink-0"
-                      />
+                  <AnimatePresence mode="popLayout" initial={false}>
+                    {cart.map((item) => (
+                      <motion.div
+                        key={item.cartItemId}
+                        layout
+                        initial={shouldReduceMotion ? false : { opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
+                        transition={{ duration: 0.25, ease: 'easeInOut' }}
+                        className="overflow-hidden"
+                      >
+                        <div className="bg-[#09090B] border border-[#27272A] rounded-xl p-3 flex gap-3 items-start">
+                          {/* Thumbnail */}
+                          <img
+                            src={item.menuItem.image}
+                            alt={item.menuItem.name}
+                            className="w-16 h-16 rounded-lg object-cover bg-[#1C1C21] flex-shrink-0"
+                          />
 
-                      {/* Info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-1">
-                          <h4 className="text-xs sm:text-sm font-bold text-white truncate">
-                            {item.menuItem.name}
-                          </h4>
-                          <button
-                            onClick={() => removeFromCart(item.cartItemId)}
-                            className="text-[#71717A] hover:text-[#D92D16] p-1 transition-colors cursor-pointer"
-                            title="حذف من السلة"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
+                          {/* Info */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-1">
+                              <h4 className="text-xs sm:text-sm font-bold text-white truncate">
+                                {item.menuItem.name}
+                              </h4>
+                              <button
+                                onClick={() => removeFromCart(item.cartItemId)}
+                                className="text-[#71717A] hover:text-[#D92D16] p-1 transition-colors cursor-pointer"
+                                title="حذف من السلة"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
 
-                        {/* Weight if any */}
-                        {item.selectedWeight && (
-                          <span className="inline-block text-[11px] font-semibold text-[#FF5A1F] bg-[#D92D16]/10 px-2 py-0.5 rounded mt-0.5">
-                            الوزن: {item.selectedWeight.label}
-                          </span>
-                        )}
-
-                        {/* Add-ons list if any */}
-                        {item.selectedAddOns.length > 0 && (
-                          <div className="text-[10px] text-[#A1A1AA] mt-1 space-x-1 space-x-reverse">
-                            <span className="text-[#FFB020]">إضافات:</span>
-                            {item.selectedAddOns.map((a) => (
-                              <span key={a.id} className="bg-[#1C1C21] px-1.5 py-0.5 rounded text-[#FAFAFA]">
-                                {a.name}
+                            {/* Weight if any */}
+                            {item.selectedWeight && (
+                              <span className="inline-block text-[11px] font-semibold text-[#FF5A1F] bg-[#D92D16]/10 px-2 py-0.5 rounded mt-0.5">
+                                الوزن: {item.selectedWeight.label}
                               </span>
-                            ))}
-                          </div>
-                        )}
+                            )}
 
-                        {/* Notes if any */}
-                        {item.notes && (
-                          <p className="text-[10px] text-[#A1A1AA] italic mt-1 bg-[#141417] px-2 py-0.5 rounded">
-                            ملاحظة: {item.notes}
-                          </p>
-                        )}
+                            {/* Add-ons list if any */}
+                            {item.selectedAddOns.length > 0 && (
+                              <div className="text-[10px] text-[#A1A1AA] mt-1 space-x-1 space-x-reverse">
+                                <span className="text-[#FFB020]">إضافات:</span>
+                                {item.selectedAddOns.map((a) => (
+                                  <span key={a.id} className="bg-[#1C1C21] px-1.5 py-0.5 rounded text-[#FAFAFA]">
+                                    {a.name}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
 
-                        {/* Price & Stepper Row */}
-                        <div className="flex items-center justify-between mt-3 pt-2 border-t border-[#1C1C21]">
-                          <div className="flex items-center gap-1.5 font-['Oswald'] tabular-nums">
-                            <span className="text-sm font-black text-white">{item.totalPrice}</span>
-                            <span className="text-[10px] font-bold text-[#FF5A1F]">ج.م</span>
-                          </div>
+                            {/* Notes if any */}
+                            {item.notes && (
+                              <p className="text-[10px] text-[#A1A1AA] italic mt-1 bg-[#141417] px-2 py-0.5 rounded">
+                                ملاحظة: {item.notes}
+                              </p>
+                            )}
 
-                          <div className="flex items-center gap-1.5 bg-[#141417] border border-[#27272A] rounded-lg p-0.5">
-                            <button
-                              onClick={() => updateQuantity(item.cartItemId, item.quantity - 1)}
-                              className="w-6 h-6 rounded bg-[#1C1C21] hover:bg-[#27272A] text-white flex items-center justify-center cursor-pointer transition-colors"
-                            >
-                              <Minus className="w-3 h-3" />
-                            </button>
-                            <span className="w-5 text-center text-xs font-bold text-white font-['Oswald'] tabular-nums">
-                              {item.quantity}
-                            </span>
-                            <button
-                              onClick={() => updateQuantity(item.cartItemId, item.quantity + 1)}
-                              className="w-6 h-6 rounded bg-[#1C1C21] hover:bg-[#27272A] text-white flex items-center justify-center cursor-pointer transition-colors"
-                            >
-                              <Plus className="w-3 h-3" />
-                            </button>
+                            {/* Price & Stepper Row */}
+                            <div className="flex items-center justify-between mt-3 pt-2 border-t border-[#1C1C21]">
+                              <div className="flex items-center gap-1.5 font-['Oswald'] tabular-nums">
+                                <span className="text-sm font-black text-white">{item.totalPrice}</span>
+                                <span className="text-[10px] font-bold text-[#FF5A1F]">ج.م</span>
+                              </div>
+
+                              <div className="flex items-center gap-1.5 bg-[#141417] border border-[#27272A] rounded-lg p-0.5">
+                                <button
+                                  onClick={() => updateQuantity(item.cartItemId, item.quantity - 1)}
+                                  className="w-6 h-6 rounded bg-[#1C1C21] hover:bg-[#27272A] text-white flex items-center justify-center cursor-pointer transition-colors"
+                                >
+                                  <Minus className="w-3.5 h-3.5" />
+                                </button>
+                                <span className="w-5 text-center text-xs font-bold text-white font-['Oswald'] tabular-nums">
+                                  {item.quantity}
+                                </span>
+                                <button
+                                  onClick={() => updateQuantity(item.cartItemId, item.quantity + 1)}
+                                  className="w-6 h-6 rounded bg-[#1C1C21] hover:bg-[#27272A] text-white flex items-center justify-center cursor-pointer transition-colors"
+                                >
+                                  <Plus className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </div>
-                  ))}
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
                 </div>
 
                 {/* Checkout Details Form */}
@@ -238,7 +248,7 @@ export const CartDrawer: React.FC = () => {
                       required
                       value={orderForm.customerName}
                       onChange={(e) => updateOrderField('customerName', e.target.value)}
-                      placeholder="اكتب اسمك الكريم"
+                      placeholder="باسم مين الطلب؟"
                       className="w-full bg-[#141417] border border-[#27272A] focus:border-[#FF5A1F] rounded-xl px-3 py-2 text-xs text-white placeholder-[#71717A] focus:outline-none"
                     />
                   </div>
