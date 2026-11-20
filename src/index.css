@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+@theme {
+  --color-void: #09090B;
+  --color-surface: #141417;
+  --color-surface-hover: #1C1C21;
+  --color-surface-card: #18181B;
+  --color-border-ash: #27272A;
+  --color-border-hair: #3F3F46;
+  --color-ember: #D92D16;
+  --color-flame: #FF5A1F;
+  --color-amber: #FFB020;
+  --color-ash: #C8CCD0;
+  --color-ash-muted: #71717A;
+  --color-ink: #FAFAFA;
+  --color-ink-muted: #A1A1AA;
+  --font-cairo: 'Cairo', sans-serif;
+  --font-arabic: 'IBM Plex Sans Arabic', sans-serif;
+  --font-oswald: 'Oswald', sans-serif;
+}
+
+@layer base {
+  * {
+    border-color: #27272A;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: #09090B;
+    color: #FAFAFA;
+    font-family: 'Cairo', sans-serif;
+    min-height: 100vh;
+  }
+}
+
+/* Custom Charcoal & Noise Subtlety */
+.charcoal-noise {
+  background-image: radial-gradient(rgba(217, 45, 22, 0.04) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #09090B;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #27272A;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #D92D16;
+}
+
+/* Rising Embers Keyframes (GPU transform + opacity only) */
+@keyframes emberDrift {
+  0% {
+    transform: translateY(0) translateX(0) scale(0.8);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.8;
+  }
+  80% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-120px) translateX(var(--drift-x, 15px)) scale(0.2);
+    opacity: 0;
+  }
+}
+
+.animate-ember {
+  animation: emberDrift var(--duration, 4s) ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-ember {
+    animation: none;
+    opacity: 0.2;
+  }
+  
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Tabular Numbers */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
