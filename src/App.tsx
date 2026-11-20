@@ -6,7 +6,6 @@ import { MENU_ITEMS } from './data/menuData';
 import { Header } from './components/Header';
 import { HeroBanner } from './components/HeroBanner';
 import { DecisionBar } from './components/DecisionBar';
-import { CategoryNav } from './components/CategoryNav';
 import { MenuItemCard } from './components/MenuItemCard';
 import { ItemDetailModal } from './components/ItemDetailModal';
 import { FloatingCartBar } from './components/FloatingCartBar';
@@ -65,7 +64,6 @@ const cardVariants: Variants = {
 
 export const App: React.FC = () => {
   const shouldReduceMotion = useReducedMotion();
-  const [activeCategory, setActiveCategory] = useState<CategoryId>('sandwiches');
   const [selectedCraving, setSelectedCraving] = useState<CravingType>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -109,16 +107,6 @@ export const App: React.FC = () => {
     return groups;
   }, [filteredItems]);
 
-  // Category counts for badges
-  const categoryCounts = useMemo(() => {
-    return {
-      sandwiches: groupedItems.sandwiches.length,
-      weights: groupedItems.weights.length,
-      meals: groupedItems.meals.length,
-      sides: groupedItems.sides.length,
-    };
-  }, [groupedItems]);
-
   const totalResults = filteredItems.length;
 
   return (
@@ -129,19 +117,12 @@ export const App: React.FC = () => {
       {/* Editorial Hero Banner */}
       <HeroBanner />
 
-      {/* Quick Decision Craving Bar + Search */}
+      {/* Unified Sticky Category Navigation Bar + Search */}
       <DecisionBar
         selectedCraving={selectedCraving}
         onSelectCraving={setSelectedCraving}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-      />
-
-      {/* Sticky Category Navigation Dock */}
-      <CategoryNav
-        activeCategory={activeCategory}
-        onSelectCategory={setActiveCategory}
-        categoryCounts={categoryCounts}
       />
 
       {/* Main Menu Grid Content */}

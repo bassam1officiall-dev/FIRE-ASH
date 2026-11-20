@@ -18,10 +18,10 @@ export const RESTAURANT_INFO: RestaurantInfo = {
 
 export const CRAVING_FILTERS: Array<{ id: CravingType; label: string }> = [
   { id: 'all', label: 'الكل' },
-  { id: 'quick-sandwich', label: 'ساندوتش سريع' },
-  { id: 'filling-meal', label: 'وجبات تشبّع' },
-  { id: 'weight-grills', label: 'مشويات بالوزن' },
-  { id: 'sides', label: 'سلطات وإضافات' },
+  { id: 'quick-sandwich', label: 'ساندوتشات' },
+  { id: 'weight-grills', label: 'الوزنات' },
+  { id: 'filling-meal', label: 'الوجبات' },
+  { id: 'sides', label: 'الإضافات والسلطات' },
 ];
 
 export const UPSELL_ADDONS: AddOnOption[] = [

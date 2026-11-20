@@ -128,11 +128,10 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item }) => {
                 <button
                   key={w.id}
                   onClick={() => setSelectedWeight(w)}
-                  className={`flex-1 py-1 px-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer relative text-center ${
-                    isSelected
-                      ? 'text-white'
-                      : 'text-[#A1A1AA] hover:text-[#FAFAFA] hover:bg-[#141417]'
-                  }`}
+                  className={`flex-1 py-1 px-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer relative text-center ${isSelected
+                    ? 'text-white'
+                    : 'text-[#A1A1AA] hover:text-[#FAFAFA] hover:bg-[#141417]'
+                    }`}
                 >
                   {isSelected && (
                     <motion.div
@@ -172,11 +171,10 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item }) => {
           <div className="flex items-center gap-1.5">
             <button
               onClick={handleQuickAdd}
-              className={`relative px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                justAdded
-                  ? 'bg-emerald-600 text-white'
-                  : 'bg-gradient-to-r from-[#D92D16] to-[#FF5A1F] hover:from-[#FF5A1F] hover:to-[#D92D16] text-white shadow-md shadow-[#D92D16]/20 active:scale-95'
-              }`}
+              className={`relative px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${justAdded
+                ? 'bg-emerald-600 text-white'
+                : 'bg-gradient-to-r from-[#D92D16] to-[#FF5A1F] hover:from-[#FF5A1F] hover:to-[#D92D16] text-white shadow-md shadow-[#D92D16]/20 active:scale-95'
+                }`}
               title="إضافة سريعة إلى السلة"
             >
               <AnimatePresence mode="wait" initial={false}>
