@@ -75,7 +75,7 @@ export const Header: React.FC = () => {
               </span>
             </div>
             <p className="text-xs sm:text-sm text-[#A1A1AA] mt-1 font-medium">
-              مشويات ومطعم على الفحم الحي — البدرشين
+              مطعم مشويات على الفحم - البدرشين
             </p>
           </div>
         </div>

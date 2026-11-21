@@ -46,7 +46,7 @@ export const LocationInfoModal: React.FC = () => {
             </div>
             <div>
               <h3 className="text-lg font-bold text-white">عنوان وتواصل FIRE &amp; ASH</h3>
-              <p className="text-xs text-[#A1A1AA]">مطعم ومشويات الفحم الحي بالبدرشين</p>
+              <p className="text-xs text-[#A1A1AA]">مطعم مشويات على الفحم - البدرشين</p>
             </div>
           </div>
 

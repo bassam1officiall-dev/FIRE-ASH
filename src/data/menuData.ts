@@ -13,7 +13,7 @@ export const RESTAURANT_INFO: RestaurantInfo = {
   whatsappLink: 'https://wa.me/201120774455',
   address: 'البدرشين، أول طريق أبو ربع، بجوار مسجد شكري لبنة',
   facebookUrl: 'https://www.facebook.com/61590507395898/',
-  hours: 'يومياً من 12:00 ظهراً حتى 2:00 صباحاً',
+  hours: 'كل يوم من 11 صباحاً لـ 3:30 فجراً',
 };
 
 export const CRAVING_FILTERS: Array<{ id: CravingType; label: string }> = [
