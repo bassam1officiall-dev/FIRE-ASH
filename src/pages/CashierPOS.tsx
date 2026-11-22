@@ -18,6 +18,7 @@ import { auth, db } from '../lib/firebase';
 import { isManager } from '../utils/auth';
 import { getBusinessDate, formatCairoTime } from '../utils/businessDate';
 import { recordOrderDailySummary, cancelOrderDailySummary } from '../utils/dailySummary';
+import { stripUndefined } from '../utils/firestoreClean';
 import { useMenu } from '../context/MenuContext';
 import type { MenuItem, WeightOption, CategoryId } from '../types/menu';
 import type {
@@ -329,12 +330,12 @@ export const CashierPOS: React.FC = () => {
   // Add Item to Ticket (standard or weighted)
   const addItemToTicket = (item: MenuItem, weightOpt?: WeightOption) => {
     const unitPrice = weightOpt ? weightOpt.price : item.price;
-    const weightLabel = weightOpt ? weightOpt.label : undefined;
+    const weightLabel = weightOpt ? weightOpt.label : '';
 
     setTicketItems((prev) => {
       // Check if same item with same weight already exists
       const existingIdx = prev.findIndex(
-        (i) => i.itemId === item.id && i.weightLabel === weightLabel
+        (i) => i.itemId === item.id && (i.weightLabel || '') === (weightLabel || '')
       );
 
       if (existingIdx >= 0) {
@@ -353,9 +354,9 @@ export const CashierPOS: React.FC = () => {
       const newItem: POSOrderItem = {
         itemId: item.id,
         name: item.name,
-        categoryId: item.categoryId,
+        categoryId: item.categoryId || '',
         price: unitPrice,
-        weightLabel,
+        weightLabel: weightLabel || '',
         quantity: 1,
         kitchenNotes: [],
         customNote: '',
@@ -500,36 +501,49 @@ export const CashierPOS: React.FC = () => {
             updatePayload.addresses = arrayUnion(cleanAddress);
           }
 
-          await setDoc(custRef, updatePayload, { merge: true });
+          await setDoc(custRef, stripUndefined(updatePayload), { merge: true });
         } catch (crmErr) {
           console.warn('[CashierPOS] CRM upsert error:', crmErr);
         }
       }
 
-      // 2. Prepare Order Payload
+      // 2. Prepare Clean Order Items (guaranteeing zero undefined fields in array)
+      const cleanedItems: POSOrderItem[] = ticketItems.map((it) => ({
+        itemId: it.itemId,
+        name: it.name,
+        categoryId: it.categoryId || '',
+        price: Number(it.price || 0),
+        weightLabel: it.weightLabel || '',
+        quantity: Number(it.quantity || 1),
+        kitchenNotes: Array.isArray(it.kitchenNotes) ? it.kitchenNotes : [],
+        customNote: it.customNote || '',
+        totalPrice: Number(it.totalPrice || 0),
+      }));
+
+      // 3. Prepare Order Payload
       if (editingOrder) {
         // Update Existing Order
         const orderRef = doc(db, 'orders', editingOrder.id);
         const updatedOrder: POSOrder = {
           ...editingOrder,
           orderType,
-          tableNumber: orderType === 'dine_in' ? tableNumber : '',
+          tableNumber: orderType === 'dine_in' ? (tableNumber || '') : '',
           paymentMethod,
-          customerName: cleanName || undefined,
-          customerPhone: cleanPhone || undefined,
-          deliveryAddress: cleanAddress || undefined,
-          items: ticketItems,
-          subtotal,
-          deliveryFee,
-          discount,
-          finalTotal,
-          notes: orderNotes || undefined,
+          customerName: cleanName || '',
+          customerPhone: cleanPhone || '',
+          deliveryAddress: cleanAddress || '',
+          items: cleanedItems,
+          subtotal: Number(subtotal || 0),
+          deliveryFee: Number(deliveryFee || 0),
+          discount: Number(discount || 0),
+          finalTotal: Number(finalTotal || 0),
+          notes: orderNotes || '',
           updatedAt: serverTimestamp(),
         };
 
-        await updateDoc(orderRef, {
+        const updatePayload = {
           orderType: updatedOrder.orderType,
-          tableNumber: updatedOrder.tableNumber,
+          tableNumber: updatedOrder.tableNumber || '',
           paymentMethod: updatedOrder.paymentMethod,
           customerName: updatedOrder.customerName || '',
           customerPhone: updatedOrder.customerPhone || '',
@@ -541,7 +555,9 @@ export const CashierPOS: React.FC = () => {
           finalTotal: updatedOrder.finalTotal,
           notes: updatedOrder.notes || '',
           updatedAt: updatedOrder.updatedAt,
-        });
+        };
+
+        await updateDoc(orderRef, stripUndefined(updatePayload));
 
         // Atomic Daily Summary Adjustment
         await recordOrderDailySummary(db, updatedOrder, false, editingOrder);
@@ -568,25 +584,25 @@ export const CashierPOS: React.FC = () => {
           dailyOrderSeq: dailySeq,
           businessDate: currentBusinessDate,
           orderType,
-          tableNumber: orderType === 'dine_in' ? tableNumber : '',
+          tableNumber: orderType === 'dine_in' ? (tableNumber || '') : '',
           paymentMethod,
           status: 'completed',
-          customerName: cleanName || undefined,
-          customerPhone: cleanPhone || undefined,
-          deliveryAddress: cleanAddress || undefined,
-          items: ticketItems,
-          subtotal,
-          deliveryFee,
-          discount,
-          finalTotal,
-          notes: orderNotes || undefined,
+          customerName: cleanName || '',
+          customerPhone: cleanPhone || '',
+          deliveryAddress: cleanAddress || '',
+          items: cleanedItems,
+          subtotal: Number(subtotal || 0),
+          deliveryFee: Number(deliveryFee || 0),
+          discount: Number(discount || 0),
+          finalTotal: Number(finalTotal || 0),
+          notes: orderNotes || '',
           createdBy: currentUser?.email || 'cashier@fireandash.local',
           createdByName: currentUser?.displayName || (isManager(currentUser) ? 'المدير' : 'الكاشير'),
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
         };
 
-        await setDoc(newOrderRef, newOrder);
+        await setDoc(newOrderRef, stripUndefined(newOrder));
 
         // Atomic Daily Summary Rollup
         await recordOrderDailySummary(db, newOrder, true);
@@ -619,10 +635,10 @@ export const CashierPOS: React.FC = () => {
 
     try {
       const orderRef = doc(db, 'orders', order.id);
-      await updateDoc(orderRef, {
+      await updateDoc(orderRef, stripUndefined({
         status: 'cancelled',
         updatedAt: serverTimestamp(),
-      });
+      }));
 
       // Atomically reverse daily summary counters
       await cancelOrderDailySummary(db, order);

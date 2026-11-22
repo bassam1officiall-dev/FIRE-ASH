@@ -1,5 +1,6 @@
 import { doc, setDoc, increment, serverTimestamp, type Firestore } from 'firebase/firestore';
 import type { POSOrder } from '../types/pos';
+import { stripUndefined } from './firestoreClean';
 
 /**
  * Atomically updates daily_summaries/{businessDate} when an order is created or updated.
@@ -15,7 +16,7 @@ export async function recordOrderDailySummary(
   if (isNew) {
     await setDoc(
       summaryRef,
-      {
+      stripUndefined({
         businessDate: order.businessDate,
         totalSales: increment(order.finalTotal),
         ordersCount: increment(1),
@@ -27,7 +28,7 @@ export async function recordOrderDailySummary(
         takeawayCount: increment(order.orderType === 'takeaway' ? 1 : 0),
         deliveryCount: increment(order.orderType === 'delivery' ? 1 : 0),
         updatedAt: serverTimestamp(),
-      },
+      }),
       { merge: true }
     );
   } else if (previousOrder) {
@@ -54,7 +55,7 @@ export async function recordOrderDailySummary(
 
     await setDoc(
       summaryRef,
-      {
+      stripUndefined({
         businessDate: order.businessDate,
         totalSales: increment(salesDiff),
         cashTotal: increment(newCash - oldCash),
@@ -64,7 +65,7 @@ export async function recordOrderDailySummary(
         takeawayCount: increment(newTakeaway - oldTakeaway),
         deliveryCount: increment(newDelivery - oldDelivery),
         updatedAt: serverTimestamp(),
-      },
+      }),
       { merge: true }
     );
   }
@@ -81,7 +82,7 @@ export async function cancelOrderDailySummary(
 
   await setDoc(
     summaryRef,
-    {
+    stripUndefined({
       businessDate: order.businessDate,
       totalSales: increment(-order.finalTotal),
       ordersCount: increment(-1),
@@ -93,7 +94,7 @@ export async function cancelOrderDailySummary(
       takeawayCount: increment(order.orderType === 'takeaway' ? -1 : 0),
       deliveryCount: increment(order.orderType === 'delivery' ? -1 : 0),
       updatedAt: serverTimestamp(),
-    },
+    }),
     { merge: true }
   );
 }
