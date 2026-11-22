@@ -1,27 +1,45 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../lib/firebase';
+import { isManager } from '../utils/auth';
 import { Lock, User, Eye, EyeOff, ArrowRight, ShieldCheck, AlertCircle, Loader2 } from 'lucide-react';
 
 export const AdminLogin: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectParam = searchParams.get('redirect');
+
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // If already logged in, redirect directly to /admin
+  // Destination redirect based on user role
+  const navigateByRole = useCallback(
+    (user: any) => {
+      if (isManager(user)) {
+        navigate(redirectParam || '/admin', { replace: true });
+      } else {
+        // Cashier role can only go to /cashier (or allowed non-admin redirect)
+        const target = redirectParam && !redirectParam.startsWith('/admin') ? redirectParam : '/cashier';
+        navigate(target, { replace: true });
+      }
+    },
+    [navigate, redirectParam]
+  );
+
+  // If already logged in, redirect based on role
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        navigate('/admin', { replace: true });
+        navigateByRole(user);
       }
     });
     return () => unsubscribe();
-  }, [navigate]);
+  }, [navigateByRole]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,16 +60,15 @@ export const AdminLogin: React.FC = () => {
       return;
     }
 
-    // Normalize username: if no @, append @fireandash.local
+    // Normalize username: if no @, append @fireandash.local (e.g. manager -> manager@fireandash.local, cashier -> cashier@fireandash.local)
     const email = cleanUser.includes('@') ? cleanUser : `${cleanUser}@fireandash.local`;
 
     try {
       setLoading(true);
-      await signInWithEmailAndPassword(auth, email, password);
-      navigate('/admin', { replace: true });
+      const userCred = await signInWithEmailAndPassword(auth, email, password);
+      navigateByRole(userCred.user);
     } catch (err: any) {
       console.error('[AdminLogin] Auth error:', err);
-      // Clean Arabic error messages
       if (
         err.code === 'auth/invalid-credential' ||
         err.code === 'auth/user-not-found' ||
@@ -88,70 +105,68 @@ export const AdminLogin: React.FC = () => {
             />
           </div>
           <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-            تسجيل دخول الإدارة
+            تسجيل دخول النظام
           </h1>
           <p className="text-xs text-[#A1A1AA] mt-1">
-            لوحة تحكم مشويات FIRE &amp; ASH — البدرشين
+            لوحة الإدارة ونقطة بيع الكاشير — مشويات FIRE &amp; ASH
           </p>
         </div>
 
         {/* Error Alert */}
         {errorMessage && (
           <div className="mb-5 p-3 rounded-xl bg-[#D92D16]/15 border border-[#D92D16]/40 text-[#FAFAFA] text-xs flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-[#FF5A1F] flex-shrink-0" />
+            <AlertCircle className="w-4 h-4 text-[#D92D16] flex-shrink-0" />
             <span>{errorMessage}</span>
           </div>
         )}
 
-        {/* Form */}
+        {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Username Input */}
+          {/* Username Field */}
           <div>
-            <label className="block text-xs font-bold text-[#A1A1AA] mb-1.5">
+            <label className="block text-xs font-semibold text-[#A1A1AA] mb-1.5">
               اسم المستخدم
             </label>
             <div className="relative">
               <input
                 type="text"
+                autoComplete="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="manager"
-                autoComplete="username"
+                placeholder="manager أو cashier"
+                disabled={loading}
+                className="w-full bg-[#09090B] border border-[#27272A] focus:border-[#FF5A1F] focus:ring-1 focus:ring-[#FF5A1F] rounded-xl py-2.5 pr-10 pl-3 text-sm text-white placeholder-[#52525B] outline-none transition-colors disabled:opacity-50"
                 dir="ltr"
-                className="w-full bg-[#09090B] border border-[#27272A] focus:border-[#FF5A1F] rounded-xl py-2.5 ps-10 pe-4 text-sm text-white placeholder-[#52525B] focus:outline-none transition-colors text-left font-mono"
               />
-              <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none text-[#71717A]">
-                <User className="w-4 h-4" />
-              </div>
+              <User className="w-4 h-4 text-[#71717A] absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
-            <span className="text-[11px] text-[#71717A] mt-1 block">
-              أدخل اسم المستخدم فقط (مثال: manager) دون الحاجة لكتابة بريد إلكتروني
-            </span>
+            <p className="text-[10px] text-[#52525B] mt-1 pr-1">
+              أدخل <span className="text-[#FF5A1F]">manager</span> للوحة الإدارة، أو <span className="text-[#FF5A1F]">cashier</span> لنقطة البيع
+            </p>
           </div>
 
-          {/* Password Input */}
+          {/* Password Field */}
           <div>
-            <label className="block text-xs font-bold text-[#A1A1AA] mb-1.5">
+            <label className="block text-xs font-semibold text-[#A1A1AA] mb-1.5">
               كلمة المرور
             </label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                autoComplete="current-password"
+                disabled={loading}
+                className="w-full bg-[#09090B] border border-[#27272A] focus:border-[#FF5A1F] focus:ring-1 focus:ring-[#FF5A1F] rounded-xl py-2.5 pr-10 pl-10 text-sm text-white placeholder-[#52525B] outline-none transition-colors disabled:opacity-50"
                 dir="ltr"
-                className="w-full bg-[#09090B] border border-[#27272A] focus:border-[#FF5A1F] rounded-xl py-2.5 ps-10 pe-11 text-sm text-white placeholder-[#52525B] focus:outline-none transition-colors text-left font-mono"
               />
-              <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none text-[#71717A]">
-                <Lock className="w-4 h-4" />
-              </div>
+              <Lock className="w-4 h-4 text-[#71717A] absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 end-0 pe-3 flex items-center text-[#71717A] hover:text-[#FAFAFA] transition-colors cursor-pointer"
-                aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-[#71717A] hover:text-white transition-colors cursor-pointer"
+                title={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -162,31 +177,32 @@ export const AdminLogin: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-2 py-3 px-4 rounded-xl bg-gradient-to-r from-[#D92D16] to-[#FF5A1F] hover:from-[#FF5A1F] hover:to-[#D92D16] text-white font-bold text-sm shadow-lg shadow-[#D92D16]/25 transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-98 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full mt-2 py-3 px-4 rounded-xl bg-[#D92D16] hover:bg-[#FF5A1F] active:bg-[#B91C1C] disabled:opacity-50 text-white font-bold text-sm transition-all duration-150 flex items-center justify-center gap-2 shadow-lg shadow-[#D92D16]/20 cursor-pointer"
           >
             {loading ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="w-4 h-4 animate-spin text-white" />
                 <span>جاري تسجيل الدخول...</span>
               </>
             ) : (
               <>
                 <ShieldCheck className="w-4 h-4" />
-                <span>تسجيل الدخول إلى الإدارة</span>
+                <span>دخول النظام</span>
               </>
             )}
           </button>
         </form>
 
-        {/* Return to menu */}
-        <div className="mt-6 pt-5 border-t border-[#27272A] text-center">
+        {/* Footer Link back to menu */}
+        <div className="mt-6 pt-5 border-t border-[#27272A] flex items-center justify-between text-xs text-[#71717A]">
           <Link
             to="/"
-            className="inline-flex items-center gap-1.5 text-xs text-[#A1A1AA] hover:text-white transition-colors"
+            className="inline-flex items-center gap-1.5 hover:text-white transition-colors"
           >
             <ArrowRight className="w-3.5 h-3.5" />
-            <span>العودة إلى المنيو العام</span>
+            <span>العودة إلى المنيو الإلكتروني</span>
           </Link>
+          <span className="text-[10px] text-[#52525B]">FIRE &amp; ASH v3.0</span>
         </div>
       </div>
     </div>

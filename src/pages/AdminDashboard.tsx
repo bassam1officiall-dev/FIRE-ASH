@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { useMenu } from '../context/MenuContext';
@@ -28,6 +29,7 @@ import {
   UtensilsCrossed,
   Salad,
   Flame,
+  Receipt,
 } from 'lucide-react';
 
 interface ToastInfo {
@@ -399,6 +401,14 @@ export const AdminDashboard: React.FC = () => {
 
           {/* Action Buttons */}
           <div className="flex items-center gap-2">
+            <Link
+              to="/cashier"
+              className="inline-flex items-center gap-1.5 py-2 px-3 rounded-xl bg-[#D92D16] hover:bg-[#FF5A1F] border border-[#FF5A1F]/30 text-xs font-bold text-white transition-colors cursor-pointer shadow-md shadow-[#D92D16]/20"
+              title="فتح نقطة بيع الكاشير"
+            >
+              <Receipt className="w-3.5 h-3.5" />
+              <span>فتح الكاشير</span>
+            </Link>
             <a
               href="/"
               target="_blank"

@@ -75,8 +75,17 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <Link
-                  to="/admin"
+                  to="/cashier"
                   className="hover:text-[#FAFAFA] text-[#71717A] transition-colors flex items-center gap-1.5 pt-1"
+                >
+                  <Flame className="w-3.5 h-3.5 text-[#FF5A1F]" />
+                  <span>دخول الكاشير</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/admin"
+                  className="hover:text-[#FAFAFA] text-[#71717A] transition-colors flex items-center gap-1.5"
                 >
                   <Shield className="w-3.5 h-3.5 text-[#52525B]" />
                   <span>دخول الإدارة</span>
