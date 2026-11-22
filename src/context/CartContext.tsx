@@ -116,7 +116,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     notes: string = '',
     quantity: number = 1
   ) => {
-    if (quantity <= 0) return;
+    if (quantity <= 0 || item.isAvailable === false) return;
 
     // Calculate item unit price
     const basePrice = selectedWeight ? selectedWeight.price : item.price;

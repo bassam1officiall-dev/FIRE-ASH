@@ -11,6 +11,7 @@ interface MenuItemCardProps {
 export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item }) => {
   const { addToCart, setActiveItemModal } = useCart();
   const hasWeights = Boolean(item.weights && item.weights.length > 0);
+  const isAvailable = item.isAvailable !== false;
 
   // For weight items: track selected weight option locally on the card
   const [selectedWeight, setSelectedWeight] = useState<WeightOption>(
@@ -24,6 +25,8 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item }) => {
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!isAvailable) return;
+
     addToCart(
       item,
       hasWeights ? selectedWeight : undefined,
@@ -43,14 +46,16 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item }) => {
   return (
     <div
       onClick={handleCardClick}
-      className="group relative bg-[#141417] hover:bg-[#18181D] border border-[#27272A] hover:border-[#D92D16]/50 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col justify-between cursor-pointer shadow-md shadow-black/40 hover:shadow-[inset_0_0_0_1px_rgba(217,45,22,0.3),0_10px_25px_-5px_rgba(217,45,22,0.15)]"
+      className={`group relative bg-[#141417] hover:bg-[#18181D] border border-[#27272A] hover:border-[#D92D16]/50 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col justify-between cursor-pointer shadow-md shadow-black/40 hover:shadow-[inset_0_0_0_1px_rgba(217,45,22,0.3),0_10px_25px_-5px_rgba(217,45,22,0.15)] ${
+        !isAvailable ? 'opacity-85' : ''
+      }`}
     >
       {/* Top: Image & Badges */}
       <div>
         <div className="relative w-full h-44 sm:h-48 bg-[#0D0D10] overflow-hidden">
           {!imgError ? (
             <img
-              src={item.image}
+              src={item.imageUrl || item.image}
               alt={item.name}
               onError={() => setImgError(true)}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 will-change-transform"
@@ -67,10 +72,19 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item }) => {
           <div className="absolute inset-0 bg-gradient-to-t from-[#141417] via-transparent to-transparent opacity-80" />
 
           {/* Badges */}
-          {item.badge && (
+          {item.badge && isAvailable && (
             <div className="absolute top-3 start-3">
               <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-[#D92D16] text-white shadow-md flex items-center gap-1">
                 {item.badge}
+              </span>
+            </div>
+          )}
+
+          {/* Unavailable Ribbon / Badge */}
+          {!isAvailable && (
+            <div className="absolute top-3 start-3">
+              <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-[#141417]/90 text-[#FF5A1F] border border-[#D92D16]/50 shadow-md">
+                غير متاح حالياً
               </span>
             </div>
           )}
@@ -169,42 +183,48 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item }) => {
           </div>
 
           <div className="flex items-center gap-1.5">
-            <button
-              onClick={handleQuickAdd}
-              className={`relative px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${justAdded
-                ? 'bg-emerald-600 text-white'
-                : 'bg-gradient-to-r from-[#D92D16] to-[#FF5A1F] hover:from-[#FF5A1F] hover:to-[#D92D16] text-white shadow-md shadow-[#D92D16]/20 active:scale-95'
-                }`}
-              title="إضافة سريعة إلى السلة"
-            >
-              <AnimatePresence mode="wait" initial={false}>
-                {justAdded ? (
-                  <motion.span
-                    key="added"
-                    initial={{ scale: 0.7, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.7, opacity: 0 }}
-                    transition={{ duration: 0.15 }}
-                    className="flex items-center gap-1.5"
-                  >
-                    <Check className="w-4 h-4" />
-                    <span>تمت الإضافة</span>
-                  </motion.span>
-                ) : (
-                  <motion.span
-                    key="add"
-                    initial={{ scale: 0.7, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.7, opacity: 0 }}
-                    transition={{ duration: 0.15 }}
-                    className="flex items-center gap-1.5"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>إضافة</span>
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </button>
+            {!isAvailable ? (
+              <span className="px-3 py-1.5 rounded-xl text-xs font-bold bg-[#1C1C21] text-[#71717A] border border-[#27272A] select-none cursor-not-allowed">
+                غير متاح حالياً
+              </span>
+            ) : (
+              <button
+                onClick={handleQuickAdd}
+                className={`relative px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${justAdded
+                  ? 'bg-emerald-600 text-white'
+                  : 'bg-gradient-to-r from-[#D92D16] to-[#FF5A1F] hover:from-[#FF5A1F] hover:to-[#D92D16] text-white shadow-md shadow-[#D92D16]/20 active:scale-95'
+                  }`}
+                title="إضافة سريعة إلى السلة"
+              >
+                <AnimatePresence mode="wait" initial={false}>
+                  {justAdded ? (
+                    <motion.span
+                      key="added"
+                      initial={{ scale: 0.7, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.7, opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                      className="flex items-center gap-1.5"
+                    >
+                      <Check className="w-4 h-4" />
+                      <span>تمت الإضافة</span>
+                    </motion.span>
+                  ) : (
+                    <motion.span
+                      key="add"
+                      initial={{ scale: 0.7, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.7, opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                      className="flex items-center gap-1.5"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>إضافة</span>
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </button>
+            )}
           </div>
         </div>
       </div>

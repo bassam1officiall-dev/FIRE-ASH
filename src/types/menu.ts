@@ -18,12 +18,15 @@ export interface MenuItem {
   price: number;
   description: string;
   image: string;
+  imageUrl?: string;
   weights?: WeightOption[];
   ingredients?: string[];
   badge?: string;
   cravings: CravingType[];
   isPopular?: boolean;
   isSignature?: boolean;
+  isAvailable?: boolean;
+  sortOrder?: number;
 }
 
 export interface AddOnOption {

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Phone, MessageCircle, MapPin, Flame, BookOpen } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Phone, MessageCircle, MapPin, Flame, BookOpen, Shield } from 'lucide-react';
 import { RESTAURANT_INFO } from '../data/menuData';
 import { useCart } from '../context/CartContext';
 
@@ -71,6 +72,15 @@ export const Footer: React.FC = () => {
                   <FacebookIcon className="w-3.5 h-3.5 text-blue-400" />
                   <span>صفحتنا على فيسبوك</span>
                 </a>
+              </li>
+              <li>
+                <Link
+                  to="/admin"
+                  className="hover:text-[#FAFAFA] text-[#71717A] transition-colors flex items-center gap-1.5 pt-1"
+                >
+                  <Shield className="w-3.5 h-3.5 text-[#52525B]" />
+                  <span>دخول الإدارة</span>
+                </Link>
               </li>
             </ul>
           </div>

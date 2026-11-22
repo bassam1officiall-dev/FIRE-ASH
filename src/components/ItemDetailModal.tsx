@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, Minus, Check, Sparkles, Flame } from 'lucide-react';
+import { X, Plus, Minus, Check, Sparkles, Flame, Ban } from 'lucide-react';
 import type { WeightOption, AddOnOption } from '../types/menu';
 import { UPSELL_ADDONS } from '../data/menuData';
 import { useCart } from '../context/CartContext';
@@ -38,6 +38,7 @@ export const ItemDetailModal: React.FC = () => {
   if (!activeItemModal) return null;
 
   const hasWeights = Boolean(activeItemModal.weights && activeItemModal.weights.length > 0);
+  const isAvailable = activeItemModal.isAvailable !== false;
   const basePrice = selectedWeight ? selectedWeight.price : activeItemModal.price;
   const addOnsTotal = selectedAddOns.reduce((sum, a) => sum + a.price, 0);
   const unitPrice = basePrice + addOnsTotal;
@@ -63,6 +64,7 @@ export const ItemDetailModal: React.FC = () => {
   };
 
   const handleAddToCart = () => {
+    if (!isAvailable) return;
     addToCart(
       activeItemModal,
       selectedWeight,
@@ -107,16 +109,27 @@ export const ItemDetailModal: React.FC = () => {
             {/* Dish Image */}
             <div className="relative w-full h-56 sm:h-64 bg-[#09090B]">
               <img
-                src={activeItemModal.image}
+                src={activeItemModal.imageUrl || activeItemModal.image}
                 alt={activeItemModal.name}
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = '/images/dishes/sandwich-kofta.webp';
+                }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#141417] via-transparent to-black/40" />
-              {activeItemModal.badge && (
+              {activeItemModal.badge && isAvailable && (
                 <div className="absolute top-4 start-4">
                   <span className="px-3 py-1 rounded-xl text-xs font-bold bg-[#D92D16] text-white shadow-lg flex items-center gap-1.5">
                     <Flame className="w-3.5 h-3.5" />
                     {activeItemModal.badge}
+                  </span>
+                </div>
+              )}
+              {!isAvailable && (
+                <div className="absolute top-4 start-4">
+                  <span className="px-3 py-1 rounded-xl text-xs font-bold bg-[#141417] text-[#FF5A1F] border border-[#D92D16]/50 shadow-lg flex items-center gap-1.5">
+                    <Ban className="w-3.5 h-3.5 text-[#D92D16]" />
+                    <span>غير متاح حالياً</span>
                   </span>
                 </div>
               )}
@@ -145,6 +158,12 @@ export const ItemDetailModal: React.FC = () => {
                   )}
                 </div>
               </div>
+
+              {!isAvailable && (
+                <div className="mt-3 p-3 bg-[#D92D16]/10 border border-[#D92D16]/30 rounded-xl text-xs font-bold text-[#FF5A1F] text-center">
+                  هذا الصنف غير متاح للطلب حالياً
+                </div>
+              )}
 
               <p className="text-xs sm:text-sm text-[#C8CCD0] mt-3 leading-relaxed">
                 {activeItemModal.description}
@@ -287,7 +306,7 @@ export const ItemDetailModal: React.FC = () => {
                 type="button"
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                 className="w-8 h-8 rounded-lg bg-[#1C1C21] hover:bg-[#27272A] text-white flex items-center justify-center transition-colors cursor-pointer disabled:opacity-40"
-                disabled={quantity <= 1}
+                disabled={quantity <= 1 || !isAvailable}
               >
                 <Minus className="w-3.5 h-3.5" />
               </button>
@@ -297,23 +316,33 @@ export const ItemDetailModal: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setQuantity((q) => q + 1)}
-                className="w-8 h-8 rounded-lg bg-[#1C1C21] hover:bg-[#27272A] text-white flex items-center justify-center transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-lg bg-[#1C1C21] hover:bg-[#27272A] text-white flex items-center justify-center transition-colors cursor-pointer disabled:opacity-40"
+                disabled={!isAvailable}
               >
                 <Plus className="w-3.5 h-3.5" />
               </button>
             </div>
 
             {/* Submit Add Button */}
-            <button
-              onClick={handleAddToCart}
-              className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-[#D92D16] to-[#FF5A1F] hover:from-[#FF5A1F] hover:to-[#D92D16] text-white font-bold text-sm flex items-center justify-between shadow-lg shadow-[#D92D16]/20 transition-all cursor-pointer active:scale-98"
-            >
-              <span>إضافة إلى الطلب</span>
-              <div className="flex items-baseline gap-1 font-['Oswald'] tabular-nums">
-                <span className="text-lg font-black">{grandTotal}</span>
-                <span className="text-xs">ج.م</span>
-              </div>
-            </button>
+            {!isAvailable ? (
+              <button
+                disabled
+                className="flex-1 py-3 px-4 rounded-xl bg-[#1C1C21] text-[#71717A] border border-[#27272A] font-bold text-sm flex items-center justify-center cursor-not-allowed select-none"
+              >
+                غير متاح حالياً
+              </button>
+            ) : (
+              <button
+                onClick={handleAddToCart}
+                className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-[#D92D16] to-[#FF5A1F] hover:from-[#FF5A1F] hover:to-[#D92D16] text-white font-bold text-sm flex items-center justify-between shadow-lg shadow-[#D92D16]/20 transition-all cursor-pointer active:scale-98"
+              >
+                <span>إضافة إلى الطلب</span>
+                <div className="flex items-baseline gap-1 font-['Oswald'] tabular-nums">
+                  <span className="text-lg font-black">{grandTotal}</span>
+                  <span className="text-xs">ج.م</span>
+                </div>
+              </button>
+            )}
           </div>
         </motion.div>
       </div>
